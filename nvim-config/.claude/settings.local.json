@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Read(//root/.local/share/nvim/mason/bin/**)",
+      "WebFetch(domain:github.com)",
+      "Bash(nvim:*)",
+      "Bash(find:*)",
+      "Bash(timeout:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)"
+    ],
+    "deny": []
+  }
+}

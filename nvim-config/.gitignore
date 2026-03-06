@@ -1,0 +1,7 @@
+# swap / temp
+*.swp
+*.tmp
+# local secrets
+.env
+# compiled lua byte-code
+*.luac
