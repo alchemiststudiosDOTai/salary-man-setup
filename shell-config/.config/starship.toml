@@ -1,0 +1,38 @@
+add_newline = false
+
+format = "$username$hostname$directory$git_branch$git_status$git_state$line_break$character"
+
+[username]
+show_always = true
+format = "[$user]($style)@"
+style_user = "bold yellow"
+style_root = "bold red"
+
+[hostname]
+ssh_only = false
+format = "[$hostname]($style) "
+style = "bold dimmed white"
+
+[directory]
+truncation_length = 4
+truncate_to_repo = false
+style = "bold blue"
+read_only = " "
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "bold red"
+format = '([$all_status$ahead_behind]($style) )'
+
+[git_state]
+format = "([$state( $progress_current/$progress_total)]($style) )"
+style = "bold yellow"
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"

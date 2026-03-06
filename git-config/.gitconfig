@@ -1,0 +1,39 @@
+# Managed by salary-man-setup/scripts/06-install-git-ssh-config.sh
+
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[user]
+	name = ysosrs_83
+	email = ysosrs_83@cooldev.git
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
+[push]
+	autoSetupRemote = true
+[core]
+	editor = nvim
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+	syntax-theme = Dracula
+[merge]
+	conflictstyle = diff3
+[diff]
+	colorMoved = default
+[alias]
+	st = status -sb
+	co = checkout
+	br = branch
+	ci = commit
+	lg = log --oneline --graph --decorate --all
+	review = "!f() { base=\"${1:-$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed s@^refs/remotes/origin/@@)}\"; [ -z \"$base\" ] && base=main; git diff \"$base\"...HEAD --stat && echo \"\" && git diff \"$base\"...HEAD; }; f"
+	review-stat = "!f() { base=\"${1:-$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed s@^refs/remotes/origin/@@)}\"; [ -z \"$base\" ] && base=main; git diff \"$base\"...HEAD --stat; }; f"
