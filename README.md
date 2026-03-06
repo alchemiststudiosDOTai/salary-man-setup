@@ -39,6 +39,7 @@ salary-man-setup/
 │   └── 07-install-ai-agents.sh    # install AI agent CLIs via uv
 ├── shell-config/                  # managed shell dotfiles/templates
 ├── git-config/                    # managed git config templates
+├── salaryman-skill/               # local skill for another agent to drive this repo safely
 ├── setup.sh                       # main driver that runs scripts sequentially
 └── README.md
 ```
@@ -158,6 +159,19 @@ Current behavior:
 - installs `@mariozechner/pi-coding-agent` globally with npm
 - installs `coderabbit` via `curl -fsSL https://cli.coderabbit.ai/install.sh | sh`
 - installs `@openai/codex` globally with npm
+
+## Local skill
+
+### `salaryman-skill/SKILL.md`
+
+Provides a local skill for another agent to operate inside this repo.
+
+Current behavior:
+
+- explains how to read the repo before making changes
+- describes when to use `setup.sh` versus individual numbered scripts
+- documents the tmux/remote execution pattern used to test this repo
+- reinforces secret-handling rules and the repo-local pre-commit guardrail
 
 ## Execution model
 
