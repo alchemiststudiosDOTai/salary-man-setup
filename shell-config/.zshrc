@@ -1,6 +1,6 @@
 # Managed by salary-man-setup/scripts/05-install-shell-config.sh
 
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/share/pnpm:$HOME/.bun/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/share/pnpm:$HOME/.bun/bin:$HOME/.opencode/bin:$HOME/go/bin:$PATH"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export PAGER="less -FR"

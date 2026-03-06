@@ -8,7 +8,7 @@ export GOPATH="$HOME/go"
 export PNPM_HOME="$HOME/.local/share/pnpm"
 export BUN_INSTALL="$HOME/.bun"
 
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PNPM_HOME:$BUN_INSTALL/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PNPM_HOME:$BUN_INSTALL/bin:$HOME/.opencode/bin:$HOME/go/bin:$PATH"
 
 if command -v eza >/dev/null 2>&1; then
   alias ls='eza --group-directories-first'

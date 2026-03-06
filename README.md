@@ -33,7 +33,8 @@ salary-man-setup/
 │   ├── 03-install-web-dev-stack.sh # install Python, Node/TS/Biome, Rust, uv, ruff
 │   ├── 04-install-cli-tools.sh     # install terminal-first CLI utilities
 │   ├── 05-install-shell-config.sh  # install managed bash/zsh/starship shell config
-│   └── 06-install-git-ssh-config.sh # install managed git config and normalize existing ssh perms
+│   ├── 06-install-git-ssh-config.sh # install managed git config and normalize existing ssh perms
+│   └── 07-install-ai-agents.sh     # install AI agent CLIs via uv
 ├── shell-config/                   # managed shell dotfiles/templates
 ├── git-config/                     # managed git config templates
 ├── setup.sh                        # main driver that runs scripts sequentially
@@ -131,6 +132,18 @@ Installs my managed Git config and handles SSH conservatively:
 - no SSH key generation
 - no SSH host/config scaffolding
 - normalizes permissions on an existing `~/.ssh` directory if one is already there
+
+### `scripts/07-install-ai-agents.sh`
+
+Installs AI agent tooling at the end of the flow.
+
+Current behavior:
+
+- installs `tunacode-cli` with `uv tool install --force tunacode-cli`
+- installs `opencode` via `curl -fsSL https://opencode.ai/install | bash`
+- installs `@mariozechner/pi-coding-agent` globally with npm
+- installs `coderabbit` via `curl -fsSL https://cli.coderabbit.ai/install.sh | sh`
+- installs `@openai/codex` globally with npm
 
 ## Execution model
 
