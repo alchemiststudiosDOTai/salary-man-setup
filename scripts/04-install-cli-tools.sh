@@ -101,6 +101,7 @@ install_apt_cli_tools() {
     fzf \
     gh \
     git-delta \
+    gitleaks \
     htop \
     httpie \
     hyperfine \
@@ -236,6 +237,7 @@ verify_versions() {
   printf 'eza_version=%s\n' "$(eza --version 2>/dev/null | head -n 1 || echo missing)"
   printf 'zoxide_version=%s\n' "$(zoxide --version 2>/dev/null || echo missing)"
   printf 'delta_version=%s\n' "$(delta --version 2>/dev/null || echo missing)"
+  printf 'gitleaks_version=%s\n' "$(gitleaks version 2>/dev/null || echo missing)"
   printf 'lazygit_version=%s\n' "$(lazygit --version 2>/dev/null | head -n 1 || echo missing)"
   printf 'starship_version=%s\n' "$(starship --version 2>/dev/null | head -n 1 || echo missing)"
   printf 'httpie_version=%s\n' "$(http --version 2>/dev/null || echo missing)"
@@ -258,6 +260,7 @@ verify_install() {
   verify_cmd eza_installed eza
   verify_cmd zoxide_installed zoxide
   verify_cmd delta_installed delta
+  verify_cmd gitleaks_installed gitleaks
   verify_cmd lazygit_installed lazygit
   verify_cmd starship_installed starship
   verify_cmd httpie_installed http

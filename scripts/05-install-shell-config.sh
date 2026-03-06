@@ -103,7 +103,13 @@ ensure_local_override() {
   ensure_parent_dir "$local_file"
 
   if [ ! -f "$local_file" ]; then
-    as_root touch "$local_file"
+    cat <<'EOF' | as_root tee "$local_file" >/dev/null
+# Local machine-only shell overrides.
+#
+# Keep secrets here, not in the repo.
+# Example aliases/functions live in:
+#   ~/.config/salary-man-shell/local.example.sh
+EOF
     as_root chmod 0644 "$local_file"
     as_root chown "$TARGET_USER":"$TARGET_USER" "$local_file"
     log "Created ${local_file}"
@@ -114,6 +120,7 @@ install_shell_configs() {
   install_managed_file "$ROOT_DIR/shell-config/.bashrc" "$TARGET_HOME/.bashrc" 0644
   install_managed_file "$ROOT_DIR/shell-config/.zshrc" "$TARGET_HOME/.zshrc" 0644
   install_managed_file "$ROOT_DIR/shell-config/.config/salary-man-shell/common.sh" "$TARGET_HOME/.config/salary-man-shell/common.sh" 0644
+  install_managed_file "$ROOT_DIR/shell-config/.config/salary-man-shell/local.example.sh" "$TARGET_HOME/.config/salary-man-shell/local.example.sh" 0644
   install_managed_file "$ROOT_DIR/shell-config/.config/starship.toml" "$TARGET_HOME/.config/starship.toml" 0644
   ensure_local_override
 }
@@ -154,6 +161,7 @@ verify_install() {
   verify_file_exists bashrc_installed "$TARGET_HOME/.bashrc"
   verify_file_exists zshrc_installed "$TARGET_HOME/.zshrc"
   verify_file_exists common_shell_config_installed "$TARGET_HOME/.config/salary-man-shell/common.sh"
+  verify_file_exists local_shell_example_present "$TARGET_HOME/.config/salary-man-shell/local.example.sh"
   verify_file_exists starship_config_installed "$TARGET_HOME/.config/starship.toml"
   verify_file_exists local_shell_override_present "$TARGET_HOME/.config/salary-man-shell/local.sh"
   verify_file_has_line bash_starship_init_present "$TARGET_HOME/.bashrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"'
@@ -174,6 +182,7 @@ print_notes() {
 Done.
 - Managed shell files now live in this repo under shell-config/
 - Existing shell files were backed up to: ${BACKUP_DIR}
+- Redacted example aliases/functions are in: ${TARGET_HOME}/.config/salary-man-shell/local.example.sh
 - Per-machine or secret local additions can go in: ${TARGET_HOME}/.config/salary-man-shell/local.sh
 EOF
 }

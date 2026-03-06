@@ -25,19 +25,21 @@ Instead of rebuilding my environment from memory every time, I keep the steps he
 
 ```text
 salary-man-setup/
-├── nvim-config/                     # saved copy of my Neovim config
+├── .githooks/                      # repo-local git hooks, including secret leak guardrails
+├── nvim-config/                    # saved copy of my Neovim config
 ├── scripts/
-│   ├── 01-build-neovim.sh          # build/install Neovim from source, restore config, verify install
+│   ├── 00-enable-repo-hooks.sh    # enable tracked repo hooks for this clone
+│   ├── 01-build-neovim.sh         # build/install Neovim from source, restore config, verify install
 │   ├── 02-install-devops-sysadmin-tools.sh
-│   │                                 # install devops/sysadmin toolchain
+│   │                                # install devops/sysadmin toolchain
 │   ├── 03-install-web-dev-stack.sh # install Python, Node/TS/Biome, Rust, uv, ruff
-│   ├── 04-install-cli-tools.sh     # install terminal-first CLI utilities
-│   ├── 05-install-shell-config.sh  # install managed bash/zsh/starship shell config
+│   ├── 04-install-cli-tools.sh    # install terminal-first CLI utilities
+│   ├── 05-install-shell-config.sh # install managed bash/zsh/starship shell config
 │   ├── 06-install-git-ssh-config.sh # install managed git config and normalize existing ssh perms
-│   └── 07-install-ai-agents.sh     # install AI agent CLIs via uv
-├── shell-config/                   # managed shell dotfiles/templates
-├── git-config/                     # managed git config templates
-├── setup.sh                        # main driver that runs scripts sequentially
+│   └── 07-install-ai-agents.sh    # install AI agent CLIs via uv
+├── shell-config/                  # managed shell dotfiles/templates
+├── git-config/                    # managed git config templates
+├── setup.sh                       # main driver that runs scripts sequentially
 └── README.md
 ```
 
@@ -91,6 +93,16 @@ Installs my web/dev language stack, including:
 - Astral `uv`
 - `ruff`
 
+### `scripts/00-enable-repo-hooks.sh`
+
+Enables tracked repo-local git hooks for the current clone.
+
+Current behavior:
+
+- configures `core.hooksPath` to `.githooks`
+- enables the tracked pre-commit hook
+- makes secret leak checks run before each commit
+
 ### `scripts/04-install-cli-tools.sh`
 
 Installs my terminal-first CLI baseline, including tools such as:
@@ -104,6 +116,7 @@ Installs my terminal-first CLI baseline, including tools such as:
 - eza
 - zoxide
 - git-delta
+- gitleaks
 - lazygit
 - starship
 - httpie
@@ -120,9 +133,10 @@ Installs my managed shell setup, including:
 - repo-managed `.bashrc`
 - repo-managed `.zshrc`
 - common shell aliases/functions
+- redacted `local.example.sh` with extra aliases/functions from my old bashrc
 - starship config
 - zoxide/direnv shell init
-- local override file for machine-specific additions
+- local override file for machine-specific additions and secrets
 
 ### `scripts/06-install-git-ssh-config.sh`
 

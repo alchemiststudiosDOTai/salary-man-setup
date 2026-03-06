@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+if git diff --cached --quiet; then
+  exit 0
+fi
+
+red() {
+  printf '\033[31m%s\033[0m\n' "$*" >&2
+}
+
+yellow() {
+  printf '\033[33m%s\033[0m\n' "$*" >&2
+}
+
+run_gitleaks() {
+  if ! command -v gitleaks >/dev/null 2>&1; then
+    return 2
+  fi
+
+  if gitleaks protect --staged --source "$ROOT_DIR" --redact --no-banner >"$TMP_DIR/gitleaks.out" 2>&1; then
+    return 0
+  fi
+
+  red "Commit blocked: gitleaks detected a suspected secret in staged changes."
+  cat "$TMP_DIR/gitleaks.out" >&2
+  yellow "Review the staged diff and remove the secret before committing."
+  yellow "If this is an intentional false positive, commit with --no-verify."
+  return 1
+}
+
+extract_added_lines() {
+  git diff --cached --no-color --unified=0 -- . \
+    | awk '/^\+[^+]/ { sub(/^\+/, ""); print }' > "$TMP_DIR/added-lines.txt"
+}
+
+run_pattern_fallback() {
+  extract_added_lines
+
+  if [ ! -s "$TMP_DIR/added-lines.txt" ]; then
+    return 0
+  fi
+
+  local hard_patterns value_patterns
+  hard_patterns='gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----'
+  value_patterns="(API_KEY|AUTH_TOKEN|ACCESS_TOKEN|SECRET_KEY|CLIENT_SECRET|TOKEN)\\s*[:=]\\s*['\"][^'\"]+['\"]"
+
+  : > "$TMP_DIR/suspects.txt"
+  grep -nE "$hard_patterns" "$TMP_DIR/added-lines.txt" >> "$TMP_DIR/suspects.txt" || true
+  grep -nE "$value_patterns" "$TMP_DIR/added-lines.txt" | grep -viE '<set-local-token>|changeme|example|placeholder|your-token|your-key|dummy|fake|test-token|replace-me' >> "$TMP_DIR/suspects.txt" || true
+
+  if [ ! -s "$TMP_DIR/suspects.txt" ]; then
+    return 0
+  fi
+
+  red "Commit blocked: fallback secret scan found suspicious staged content."
+  cat "$TMP_DIR/suspects.txt" >&2
+  yellow "Review the staged diff and remove the secret before committing."
+  yellow "If this is an intentional false positive, commit with --no-verify."
+  return 1
+}
+
+if ! run_gitleaks; then
+  status=$?
+  if [ "$status" -ne 2 ]; then
+    exit "$status"
+  fi
+fi
+
+run_pattern_fallback
+exit $?
