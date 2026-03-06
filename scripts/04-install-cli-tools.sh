@@ -111,6 +111,7 @@ install_apt_cli_tools() {
     ripgrep \
     rlwrap \
     shellcheck \
+    tea \
     tig \
     tmux \
     tree \
@@ -246,6 +247,7 @@ verify_versions() {
   printf 'direnv_version=%s\n' "$(direnv version 2>/dev/null || echo missing)"
   printf 'btop_version=%s\n' "$(btop --version 2>/dev/null | head -n 1 || echo missing)"
   printf 'shellcheck_version=%s\n' "$(shellcheck --version 2>/dev/null | awk 'NR==2 {print $2}' || echo missing)"
+  printf 'tea_version=%s\n' "$(tea --version 2>/dev/null | head -n 1 | sed 's/\x1b\[[0-9;]*m//g' || echo missing)"
   printf 'jq_version=%s\n' "$(jq --version 2>/dev/null || echo missing)"
 }
 
@@ -269,6 +271,7 @@ verify_install() {
   verify_cmd direnv_installed direnv
   verify_cmd btop_installed btop
   verify_cmd shellcheck_installed shellcheck
+  verify_cmd tea_installed tea
   verify_cmd jq_installed jq
   verify_file_has_line starship_bash_init_configured "$TARGET_HOME/.bashrc" 'eval "$(starship init bash)"'
   verify_file_has_line starship_zsh_init_configured "$TARGET_HOME/.zshrc" 'eval "$(starship init zsh)"'

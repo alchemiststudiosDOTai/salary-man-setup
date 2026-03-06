@@ -126,6 +126,8 @@ Installs my terminal-first CLI baseline, including tools such as:
 - direnv
 - btop
 - shellcheck
+- tea
+- tea
 
 ### `scripts/05-install-shell-config.sh`
 
