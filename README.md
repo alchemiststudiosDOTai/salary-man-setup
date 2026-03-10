@@ -1,5 +1,9 @@
 # salary-man-setup
 
+```bash
+curl -fsSL https://raw.githubusercontent.com/alchemiststudiosDOTai/salary-man-setup/main/install.sh | bash
+```
+
 Personal setup repo for rebuilding my working environment when I move to a new machine, server, WSL instance, or remote box.
 
 ## Purpose
