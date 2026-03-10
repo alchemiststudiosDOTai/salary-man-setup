@@ -40,6 +40,7 @@ salary-man-setup/
 ├── shell-config/                  # managed shell dotfiles/templates
 ├── git-config/                    # managed git config templates
 ├── salaryman-skill/               # local skill for another agent to drive this repo safely
+├── install.sh                     # curlable bootstrap script: clone/update repo then run setup.sh
 ├── setup.sh                       # main driver that runs scripts sequentially
 └── README.md
 ```
@@ -179,7 +180,27 @@ Current behavior:
 
 The scripts are intended to be run **sequentially** by a single top-level driver script.
 
-Default flow:
+Bootstrap from a fresh machine with one command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alchemiststudiosDOTai/salary-man-setup/main/install.sh | bash
+```
+
+Run only selected setup sections through the bootstrap script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alchemiststudiosDOTai/salary-man-setup/main/install.sh | bash -s -- 04-install-cli-tools.sh 05-install-shell-config.sh
+```
+
+Clone/update the repo without running setup yet:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alchemiststudiosDOTai/salary-man-setup/main/install.sh | bash -s -- --skip-run
+```
+
+If you are running from a root shell, set `TARGET_USER` so user-scoped files do not get installed into `/root`.
+
+Default flow from an existing clone:
 
 ```bash
 ./setup.sh
