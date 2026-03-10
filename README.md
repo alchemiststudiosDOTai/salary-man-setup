@@ -31,6 +31,7 @@ Instead of rebuilding my environment from memory every time, I keep the steps he
 salary-man-setup/
 ├── .githooks/                      # repo-local git hooks, including secret leak guardrails
 ├── nvim-config/                    # saved copy of my Neovim config
+├── harness-engineering/            # shared harness prompts/agents/commands copied to target user's home
 ├── scripts/
 │   ├── 00-enable-repo-hooks.sh    # enable tracked repo hooks for this clone
 │   ├── 01-build-neovim.sh         # build/install Neovim from source, restore config, verify install
@@ -166,6 +167,7 @@ Current behavior:
 - installs `@mariozechner/pi-coding-agent` globally with npm
 - installs `coderabbit` via `curl -fsSL https://cli.coderabbit.ai/install.sh | sh`
 - installs `@openai/codex` globally with npm
+- syncs `harness-engineering/` to `~/harness-engineering` for the target user
 
 ## Local skill
 

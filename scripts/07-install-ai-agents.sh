@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 TARGET_USER="${TARGET_USER:-${SUDO_USER:-${USER}}}"
+HARNESS_SOURCE_DIR="${ROOT_DIR}/harness-engineering"
+HARNESS_TARGET_DIR_NAME="${HARNESS_TARGET_DIR_NAME:-harness-engineering}"
 CORE_FAILURE=0
 
 log() {
@@ -55,6 +59,15 @@ require_npm() {
   exit 1
 }
 
+require_harness_source() {
+  if [ -d "$HARNESS_SOURCE_DIR" ]; then
+    return
+  fi
+
+  echo "Missing required directory: ${HARNESS_SOURCE_DIR}"
+  exit 1
+}
+
 install_tunacode() {
   log "Installing tunacode-cli with uv"
   run_as_target bash -lc 'export PATH="$HOME/.local/bin:$PATH" && uv tool install --force tunacode-cli'
@@ -78,6 +91,23 @@ install_coderabbit() {
 install_codex() {
   log "Installing codex"
   as_root npm i -g @openai/codex
+}
+
+install_harness_engineering() {
+  local target_dir="${TARGET_HOME}/${HARNESS_TARGET_DIR_NAME}"
+
+  log "Installing harness-engineering content to ${target_dir}"
+
+  if command -v rsync >/dev/null 2>&1; then
+    as_root mkdir -p "$target_dir"
+    as_root rsync -a --delete "$HARNESS_SOURCE_DIR/" "$target_dir/"
+  else
+    as_root rm -rf "$target_dir"
+    as_root mkdir -p "$target_dir"
+    as_root cp -a "$HARNESS_SOURCE_DIR/." "$target_dir/"
+  fi
+
+  as_root chown -R "$TARGET_USER":"$TARGET_USER" "$target_dir"
 }
 
 verify_cmd_target() {
@@ -112,6 +142,21 @@ verify_cmd_system() {
   fi
 }
 
+verify_harness_engineering() {
+  local target_dir="${TARGET_HOME}/${HARNESS_TARGET_DIR_NAME}"
+  local status="no"
+
+  if [ -d "$target_dir" ] && [ -f "$target_dir/README.md" ]; then
+    status="yes"
+  fi
+
+  printf 'harness_engineering_installed=%s\n' "$status"
+
+  if [ "$status" != "yes" ]; then
+    CORE_FAILURE=1
+  fi
+}
+
 verify_versions() {
   printf 'uv_version=%s\n' "$(run_as_target bash -lc 'export PATH="$HOME/.local/bin:$PATH" && uv --version' 2>/dev/null || echo missing)"
   printf 'tunacode_version=%s\n' "$(run_as_target bash -lc 'export PATH="$HOME/.local/bin:$PATH" && tunacode --version' 2>/dev/null || echo missing)"
@@ -129,6 +174,7 @@ verify_install() {
   verify_cmd_system pi_installed pi
   verify_cmd_target coderabbit_installed coderabbit
   verify_cmd_system codex_installed codex
+  verify_harness_engineering
   verify_versions
 
   if [ "$CORE_FAILURE" -ne 0 ]; then
@@ -144,6 +190,7 @@ Done.
 - Installed opencode for ${TARGET_USER}
 - Installed coderabbit for ${TARGET_USER}
 - Installed pi-coding-agent and codex globally with npm
+- Synced harness-engineering content to ${TARGET_HOME}/${HARNESS_TARGET_DIR_NAME}
 EOF
 }
 
@@ -151,11 +198,13 @@ main() {
   require_target_user
   require_uv
   require_npm
+  require_harness_source
   install_tunacode
   install_opencode
   install_pi
   install_coderabbit
   install_codex
+  install_harness_engineering
   verify_install
   print_notes
 }
