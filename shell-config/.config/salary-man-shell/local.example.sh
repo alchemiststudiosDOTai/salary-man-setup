@@ -87,23 +87,29 @@ gtw() {
   fi
 }
 
-# WezTerm tab rename helper.
-RENAME() {
-  if [ -z "$*" ]; then
-    echo 'Usage: RENAME "tab name"'
+# Rename the current WezTerm tab (best approximation of a "pane name").
+rename() {
+  if [ $# -eq 0 ]; then
+    echo 'Usage: rename "tab name"'
     return 1
   fi
 
-  local name b64
-  name="$*"
-  b64="$(printf '%s' "$name" | base64 | tr -d '\n')"
+  local title="$*"
 
-  if [ -n "$TMUX" ]; then
-    printf '\033Ptmux;\033\033]1337;SetUserVar=TAB_TITLE=%s\007\033\\' "$b64"
+  if [ -n "${WEZTERM_PANE-}" ] && command -v wezterm >/dev/null 2>&1; then
+    wezterm cli set-tab-title --pane-id "$WEZTERM_PANE" "$title" >/dev/null 2>&1 || true
+    return 0
+  fi
+
+  if [ -n "${TMUX-}" ]; then
+    printf '\033Ptmux;\033\033]0;%s\007\033\\' "$title"
   else
-    printf '\033]1337;SetUserVar=TAB_TITLE=%s\007' "$b64"
+    printf '\033]0;%s\007' "$title"
   fi
 }
+
+# Back-compat with older configs.
+RENAME() { rename "$@"; }
 
 # WSL helper.
 if command -v explorer.exe >/dev/null 2>&1; then

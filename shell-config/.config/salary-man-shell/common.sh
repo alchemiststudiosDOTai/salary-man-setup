@@ -49,21 +49,30 @@ gr() {
   git diff "$base"...HEAD
 }
 
-RENAME() {
-  if [ -z "$*" ]; then
-    echo 'Usage: RENAME "tab name"'
+rename() {
+  if [ $# -eq 0 ]; then
+    echo 'Usage: rename "tab name"'
     return 1
   fi
 
-  local name b64
-  name="$*"
-  b64="$(printf '%s' "$name" | base64 | tr -d '\n')"
+  local title="$*"
 
-  if [ -n "$TMUX" ]; then
-    printf '\033Ptmux;\033\033]1337;SetUserVar=TAB_TITLE=%s\007\033\\' "$b64"
+  # WezTerm: rename the current tab based on the active pane.
+  if [ -n "${WEZTERM_PANE-}" ] && command -v wezterm >/dev/null 2>&1; then
+    wezterm cli set-tab-title --pane-id "$WEZTERM_PANE" "$title" >/dev/null 2>&1 || true
+    return 0
+  fi
+
+  # Fallback: set the terminal title (works in many terminals).
+  # When inside tmux, wrap it so it reaches the outer terminal.
+  if [ -n "${TMUX-}" ]; then
+    printf '\033Ptmux;\033\033]0;%s\007\033\\' "$title"
   else
-    printf '\033]1337;SetUserVar=TAB_TITLE=%s\007' "$b64"
+    printf '\033]0;%s\007' "$title"
   fi
 }
+
+# Back-compat / muscle memory.
+RENAME() { rename "$@"; }
 
 [ -f "$HOME/.config/salary-man-shell/local.sh" ] && source "$HOME/.config/salary-man-shell/local.sh"
