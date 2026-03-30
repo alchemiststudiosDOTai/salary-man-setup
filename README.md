@@ -125,6 +125,7 @@ Installs my terminal-first CLI baseline, including tools such as:
 - git-delta
 - gitleaks
 - lazygit
+- git-wt
 - starship
 - httpie
 - hyperfine
@@ -144,6 +145,7 @@ Installs my managed shell setup, including:
 - common shell aliases/functions
 - redacted `local.example.sh` with extra aliases/functions from my old bashrc
 - starship config
+- `git-wt` shell init so `git wt feature` can create/switch and `cd` into the worktree
 - zoxide/direnv shell init
 - local override file for machine-specific additions and secrets
 
@@ -152,6 +154,8 @@ Installs my managed shell setup, including:
 Installs my managed Git config and handles SSH conservatively:
 
 - repo-managed `.gitconfig`
+- repo-managed `~/.gitignore_global` for global ignores like `.worktrees/`
+- `git-wt` base directory configured as `.worktrees`
 - no SSH key generation
 - no SSH host/config scaffolding
 - normalizes permissions on an existing `~/.ssh` directory if one is already there

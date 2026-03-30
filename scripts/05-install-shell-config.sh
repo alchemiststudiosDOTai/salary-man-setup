@@ -165,9 +165,11 @@ verify_install() {
   verify_file_exists starship_config_installed "$TARGET_HOME/.config/starship.toml"
   verify_file_exists local_shell_override_present "$TARGET_HOME/.config/salary-man-shell/local.sh"
   verify_file_has_line bash_starship_init_present "$TARGET_HOME/.bashrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"'
+  verify_file_has_line bash_git_wt_init_present "$TARGET_HOME/.bashrc" 'command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init bash)"'
   verify_file_has_line bash_zoxide_init_present "$TARGET_HOME/.bashrc" 'command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init bash)"'
   verify_file_has_line bash_direnv_hook_present "$TARGET_HOME/.bashrc" 'command -v direnv >/dev/null 2>&1 && eval "$(direnv hook bash)"'
   verify_file_has_line zsh_starship_init_present "$TARGET_HOME/.zshrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"'
+  verify_file_has_line zsh_git_wt_init_present "$TARGET_HOME/.zshrc" 'command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init zsh)"'
   verify_file_has_line zsh_zoxide_init_present "$TARGET_HOME/.zshrc" 'command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"'
   verify_file_has_line zsh_direnv_hook_present "$TARGET_HOME/.zshrc" 'command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"'
 

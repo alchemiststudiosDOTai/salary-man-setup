@@ -18,6 +18,7 @@
 [core]
 	editor = nvim
 	pager = delta
+	excludesfile = ~/.gitignore_global
 [interactive]
 	diffFilter = delta --color-only
 [delta]
@@ -29,6 +30,8 @@
 	conflictstyle = diff3
 [diff]
 	colorMoved = default
+[wt]
+	basedir = .worktrees
 [alias]
 	st = status -sb
 	co = checkout

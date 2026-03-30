@@ -100,6 +100,7 @@ install_managed_file() {
 
 install_git_config() {
   install_managed_file "$ROOT_DIR/git-config/.gitconfig" "$TARGET_HOME/.gitconfig" 0644
+  install_managed_file "$ROOT_DIR/git-config/.gitignore_global" "$TARGET_HOME/.gitignore_global" 0644
 }
 
 normalize_ssh_permissions() {
@@ -214,9 +215,13 @@ verify_versions() {
 verify_install() {
   log "Verification"
   verify_file_exists gitconfig_installed "$TARGET_HOME/.gitconfig"
+  verify_file_exists gitignore_global_installed "$TARGET_HOME/.gitignore_global"
   verify_file_contains git_user_name_present "$TARGET_HOME/.gitconfig" 'name = '
   verify_file_contains git_user_email_present "$TARGET_HOME/.gitconfig" 'email = '
   verify_file_contains git_delta_pager_configured "$TARGET_HOME/.gitconfig" 'pager = delta'
+  verify_file_contains git_core_excludesfile_configured "$TARGET_HOME/.gitconfig" 'excludesfile = ~/.gitignore_global'
+  verify_file_contains git_wt_basedir_configured "$TARGET_HOME/.gitconfig" 'basedir = .worktrees'
+  verify_file_contains git_worktrees_global_ignore_present "$TARGET_HOME/.gitignore_global" '.worktrees/'
   verify_optional_path ssh_dir_present "$TARGET_HOME/.ssh"
   verify_optional_path ssh_config_present "$TARGET_HOME/.ssh/config"
   verify_optional_path ssh_private_key_present "$TARGET_HOME/.ssh/id_ed25519"
@@ -233,6 +238,7 @@ print_notes() {
 
 Done.
 - Installed managed ~/.gitconfig from this repo
+- Installed managed ~/.gitignore_global from this repo
 - Did not generate SSH keys
 - Did not create ~/.ssh/config or host entries
 - If ~/.ssh already existed, its permissions were normalized

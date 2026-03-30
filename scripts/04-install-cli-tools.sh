@@ -7,6 +7,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 TARGET_USER="${TARGET_USER:-${SUDO_USER:-${USER}}}"
 LAZYGIT_VERSION="${LAZYGIT_VERSION:-}"
 STARSHIP_VERSION="${STARSHIP_VERSION:-}"
+GIT_WT_VERSION="${GIT_WT_VERSION:-}"
 CORE_FAILURE=0
 
 log() {
@@ -55,9 +56,11 @@ map_arch() {
   case "$arch" in
     amd64)
       LG_ARCH="x86_64"
+      GIT_WT_ARCH="amd64"
       ;;
     arm64)
       LG_ARCH="arm64"
+      GIT_WT_ARCH="arm64"
       ;;
     *)
       echo "Unsupported architecture: $arch"
@@ -156,6 +159,30 @@ install_starship() {
   as_root "$TMP_DIR/install-starship.sh" "${installer_args[@]}"
 }
 
+install_git_wt() {
+  local version tag tarball
+  version="$GIT_WT_VERSION"
+  if [ -z "$version" ]; then
+    version="$(fetch_latest_github_tag k1LoW/git-wt)"
+  fi
+
+  case "$version" in
+    v*)
+      tag="$version"
+      ;;
+    *)
+      tag="v${version}"
+      ;;
+  esac
+
+  tarball="git-wt_${tag}_linux_${GIT_WT_ARCH}.tar.gz"
+
+  log "Installing git-wt ${tag}"
+  curl -fsSL "https://github.com/k1LoW/git-wt/releases/download/${tag}/${tarball}" -o "$TMP_DIR/$tarball"
+  tar -xzf "$TMP_DIR/$tarball" -C "$TMP_DIR" git-wt
+  as_root install -m 0755 "$TMP_DIR/git-wt" /usr/local/bin/git-wt
+}
+
 append_line_if_missing() {
   local file="$1"
   local line="$2"
@@ -166,10 +193,12 @@ append_line_if_missing() {
   fi
 }
 
-configure_starship_shell() {
-  log "Configuring starship for ${TARGET_USER}"
-  append_line_if_missing "$TARGET_HOME/.bashrc" 'eval "$(starship init bash)"'
-  append_line_if_missing "$TARGET_HOME/.zshrc" 'eval "$(starship init zsh)"'
+configure_shell_integrations() {
+  log "Configuring shell integrations for ${TARGET_USER}"
+  append_line_if_missing "$TARGET_HOME/.bashrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"'
+  append_line_if_missing "$TARGET_HOME/.bashrc" 'command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init bash)"'
+  append_line_if_missing "$TARGET_HOME/.zshrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"'
+  append_line_if_missing "$TARGET_HOME/.zshrc" 'command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init zsh)"'
   as_root chown "$TARGET_USER":"$TARGET_USER" "$TARGET_HOME/.bashrc" "$TARGET_HOME/.zshrc"
 }
 
@@ -241,6 +270,7 @@ verify_versions() {
   printf 'gitleaks_version=%s\n' "$(gitleaks version 2>/dev/null || echo missing)"
   printf 'lazygit_version=%s\n' "$(lazygit --version 2>/dev/null | head -n 1 || echo missing)"
   printf 'starship_version=%s\n' "$(starship --version 2>/dev/null | head -n 1 || echo missing)"
+  printf 'git_wt_version=%s\n' "$(git-wt --version 2>/dev/null || echo missing)"
   printf 'httpie_version=%s\n' "$(http --version 2>/dev/null || echo missing)"
   printf 'hyperfine_version=%s\n' "$(hyperfine --version 2>/dev/null || echo missing)"
   printf 'mosh_version=%s\n' "$(mosh --version 2>/dev/null | head -n 1 || echo missing)"
@@ -265,6 +295,7 @@ verify_install() {
   verify_cmd gitleaks_installed gitleaks
   verify_cmd lazygit_installed lazygit
   verify_cmd starship_installed starship
+  verify_cmd git_wt_installed git-wt
   verify_cmd httpie_installed http
   verify_cmd hyperfine_installed hyperfine
   verify_cmd mosh_installed mosh
@@ -273,8 +304,10 @@ verify_install() {
   verify_cmd shellcheck_installed shellcheck
   verify_cmd tea_installed tea
   verify_cmd jq_installed jq
-  verify_file_has_line starship_bash_init_configured "$TARGET_HOME/.bashrc" 'eval "$(starship init bash)"'
-  verify_file_has_line starship_zsh_init_configured "$TARGET_HOME/.zshrc" 'eval "$(starship init zsh)"'
+  verify_file_has_line starship_bash_init_configured "$TARGET_HOME/.bashrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init bash)"'
+  verify_file_has_line git_wt_bash_init_configured "$TARGET_HOME/.bashrc" 'command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init bash)"'
+  verify_file_has_line starship_zsh_init_configured "$TARGET_HOME/.zshrc" 'command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"'
+  verify_file_has_line git_wt_zsh_init_configured "$TARGET_HOME/.zshrc" 'command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init zsh)"'
   verify_optional gh_authenticated 'gh auth status'
   verify_versions
 
@@ -290,7 +323,7 @@ Notes:
 - Ubuntu packages install bat as batcat and fd as fdfind; this script creates /usr/local/bin/bat and /usr/local/bin/fd symlinks when needed.
 - gh auth status is informational only and does not fail the script.
 - zoxide and direnv still need shell init in your shell config to be fully useful.
-- starship init is automatically added to ${TARGET_HOME}/.bashrc and ${TARGET_HOME}/.zshrc.
+- starship and git-wt shell init are automatically added to ${TARGET_HOME}/.bashrc and ${TARGET_HOME}/.zshrc.
 EOF
 }
 
@@ -303,7 +336,8 @@ main() {
   install_apt_cli_tools
   install_lazygit
   install_starship
-  configure_starship_shell
+  install_git_wt
+  configure_shell_integrations
   ensure_ubuntu_command_aliases
   verify_install
   print_notes

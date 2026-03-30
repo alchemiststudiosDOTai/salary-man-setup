@@ -14,3 +14,4 @@ autoload -Uz compinit && compinit
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+command -v git-wt >/dev/null 2>&1 && eval "$(git-wt --init zsh)"
