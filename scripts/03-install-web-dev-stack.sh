@@ -102,7 +102,7 @@ install_python_stack() {
 add_nodesource_repo() {
   log "Adding NodeSource repo for Node.js ${NODE_MAJOR}"
   mkdir -p "$TMP_DIR/nodesource"
-  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | as_root gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | as_root gpg --batch --yes --dearmor -o /etc/apt/keyrings/nodesource.gpg
   as_root chmod a+r /etc/apt/keyrings/nodesource.gpg
   echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" | as_root tee /etc/apt/sources.list.d/nodesource.list >/dev/null
 }
@@ -111,7 +111,18 @@ install_node_stack() {
   add_nodesource_repo
   log "Installing Node.js and TypeScript tools"
   as_root apt-get update
+  # Remove any standalone npm package to prevent conflicts with NodeSource's bundled npm
+  as_root apt-get remove -y npm || true
+  as_root apt-get autoremove -y || true
   as_root apt-get install -y nodejs
+
+  # NodeSource packages sometimes ship with a broken npm; fix if needed
+  if ! npm --version >/dev/null 2>&1 || [ ! -d /usr/lib/node_modules/npm/node_modules/promise-retry ]; then
+    log "npm is broken after NodeSource install; reinstalling npm"
+    as_root rm -rf /usr/lib/node_modules/npm /usr/bin/npm /usr/bin/npx
+    as_root bash -lc 'curl -qL https://www.npmjs.com/install.sh | sh'
+  fi
+
   as_root npm install -g \
     @biomejs/biome \
     npm \
